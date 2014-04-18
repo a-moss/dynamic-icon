@@ -1,0 +1,7 @@
+# Welcome to the DynamicIcon config, made by mydeblob
+# This is the mode; possible inputs: RANDOM or PLAYER_HEAD
+# Random will randomly choose a server icon in the folder
+# Player_head will set the server icon as the skin of his head if he's joined before
+mode: RANDOM
+# This is the auto updater. Set this to false if you would like to disable this feature
+auto-update: true
