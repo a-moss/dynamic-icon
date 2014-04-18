@@ -9,16 +9,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
+
 import javax.imageio.ImageIO;
+
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.mydeblob.Updater.ReleaseType;
+
 public class ServerIcon extends JavaPlugin implements Listener{
 		public Map<String, String> playerData = new HashMap<String, String>();
+		public static boolean update = false;
+		public static String name = "";
+		public static ReleaseType type = null;
+		public static String version = "";
+		public static String link = "";
 		public void onEnable(){
 			File config = new File(getDataFolder(), "config.yml");
 			File newFolder = new File(getDataFolder() + File.separator + "serverIcons");
@@ -28,13 +41,41 @@ public class ServerIcon extends JavaPlugin implements Listener{
 			if(!newFolder.exists()){
 				newFolder.mkdir();
 			}
+			getCommand("update").setExecutor(this);
 			getServer().getPluginManager().registerEvents(this, this);
+			if(getConfig().getBoolean("auto-update")){
+				Updater updater = new Updater(this, 66080, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false); // Start Updater but just do a version check
+				update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE; // Determine if there is an update ready for us
+				name = updater.getLatestName(); // Get the latest name
+				version = updater.getLatestGameVersion(); // Get the latest game version
+				type = updater.getLatestType(); // Get the latest file's type
+				link = updater.getLatestFileLink(); // Get the latest link
+			}
 		}
 		public void onDisable() {
 			
 		}
+		public boolean onCommand(CommandSender sender, Command cmd,String commandLabel, String[] args) {
+			if (cmd.getName().equalsIgnoreCase("update")) {
+				if(sender.hasPermission("dynamicicon.update")){
+					if(getConfig().getBoolean("auto-update")){
+						@SuppressWarnings("unused")
+						Updater updater = new Updater(this, 66080, this.getFile(), Updater.UpdateType.NO_VERSION_CHECK, true); // Go straight to downloading, and announce progress to console.
+						return true;
+					}else{
+						sender.sendMessage(ChatColor.RED + "Please enable auto updating in the GuardOverseer config.yml to use this feature");
+						return true;
+					}
+				}else{
+					sender.sendMessage(ChatColor.DARK_RED + "You do not have permission to perform this command!");
+					return true;
+				}
+			}
+			return false;
+		}
 		@EventHandler
 		public void onJoin(PlayerJoinEvent e){
+			Player p = (Player) e.getPlayer();
 			if(getConfig().getString("mode").equalsIgnoreCase("player_head")){
 				String playerIP = e.getPlayer().getAddress().toString();
 				playerIP = playerIP.replaceAll("/", "");
@@ -43,6 +84,11 @@ public class ServerIcon extends JavaPlugin implements Listener{
 					playerData.put(playerIP, e.getPlayer().getName());
 				}
 			}
+			if(p.hasPermission("guardoverseer.update") && update && getConfig().getBoolean("auto-update")){
+			    p.sendMessage(ChatColor.BLUE + "An update is available: " + name + ", a " + type + " for " + version + " available at " + link);
+			    // Will look like - An update is available: AntiCheat v1.5.9, a release for CB 1.6.2-R0.1 available at http://media.curseforge.com/XYZ
+			    p.sendMessage(ChatColor.BLUE + "Type /update if you would like to automatically update.");
+			  }
 		}
 		@EventHandler
 		public void change(ServerListPingEvent e){
