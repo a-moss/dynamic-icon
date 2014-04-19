@@ -44,7 +44,7 @@ public class ServerIcon extends JavaPlugin implements Listener{
 			getCommand("diupdate").setExecutor(this);
 			getServer().getPluginManager().registerEvents(this, this);
 			if(getConfig().getBoolean("auto-update")){
-				Updater updater = new Updater(this, 66080, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false); // Start Updater but just do a version check
+				Updater updater = new Updater(this, 78461, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false); // Start Updater but just do a version check
 				update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE; // Determine if there is an update ready for us
 				name = updater.getLatestName(); // Get the latest name
 				version = updater.getLatestGameVersion(); // Get the latest game version
@@ -60,7 +60,7 @@ public class ServerIcon extends JavaPlugin implements Listener{
 				if(sender.hasPermission("dynamicicon.update")){
 					if(getConfig().getBoolean("auto-update")){
 						@SuppressWarnings("unused")
-						Updater updater = new Updater(this, 66080, this.getFile(), Updater.UpdateType.NO_VERSION_CHECK, true); // Go straight to downloading, and announce progress to console.
+						Updater updater = new Updater(this, 78461, this.getFile(), Updater.UpdateType.NO_VERSION_CHECK, true); // Go straight to downloading, and announce progress to console.
 						return true;
 					}else{
 						sender.sendMessage(ChatColor.RED + "Please enable auto updating in the GuardOverseer config.yml to use this feature");
