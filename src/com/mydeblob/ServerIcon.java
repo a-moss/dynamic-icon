@@ -94,18 +94,14 @@ public class ServerIcon extends JavaPlugin implements Listener{
 		@EventHandler
 		public void change(ServerListPingEvent e){
 			if(getConfig().getString("mode").equalsIgnoreCase("player_head")){
-				Bukkit.getServer().getLogger().info("player_head is enabled");
 				String playerIP = e.getAddress().toString();
 				playerIP = playerIP.replaceAll("/", "");
 				playerIP = playerIP.replaceAll("\\.", "-");
-				Bukkit.getServer().getLogger().info("player ip: " + playerIP);
 				if(playerData.containsKey(playerIP)){
-					Bukkit.getServer().getLogger().info("playerData contains ip");
 					try {
 						BufferedImage img = ImageIO.read(new URL("http://cravatar.eu/avatar/" + playerData.get(playerIP) + "/64.png"));
 						try{
 							e.setServerIcon(Bukkit.loadServerIcon(img));
-							Bukkit.getServer().getLogger().info("setting the icon");
 						}catch (Exception e1){
 							Bukkit.getServer().getLogger().log(Level.SEVERE, "Something bad occured! Please report this to the " + this.getName() + " dev!");
 							Bukkit.getServer().getLogger().log(Level.SEVERE, "Include this, and the error below with the report **Setting server icon with cravatar");
