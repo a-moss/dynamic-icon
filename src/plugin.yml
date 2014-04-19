@@ -3,6 +3,6 @@ main: com.mydeblob.ServerIcon
 version: 1.0
 author: mydeblob
 commands:
-   update:
+   diupdate:
       description: Updates the plugin.
       usage: /<command> 

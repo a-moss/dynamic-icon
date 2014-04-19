@@ -41,7 +41,7 @@ public class ServerIcon extends JavaPlugin implements Listener{
 			if(!newFolder.exists()){
 				newFolder.mkdir();
 			}
-			getCommand("update").setExecutor(this);
+			getCommand("diupdate").setExecutor(this);
 			getServer().getPluginManager().registerEvents(this, this);
 			if(getConfig().getBoolean("auto-update")){
 				Updater updater = new Updater(this, 66080, this.getFile(), Updater.UpdateType.NO_DOWNLOAD, false); // Start Updater but just do a version check
@@ -56,7 +56,7 @@ public class ServerIcon extends JavaPlugin implements Listener{
 			
 		}
 		public boolean onCommand(CommandSender sender, Command cmd,String commandLabel, String[] args) {
-			if (cmd.getName().equalsIgnoreCase("update")) {
+			if (cmd.getName().equalsIgnoreCase("diupdate")) {
 				if(sender.hasPermission("dynamicicon.update")){
 					if(getConfig().getBoolean("auto-update")){
 						@SuppressWarnings("unused")
@@ -80,27 +80,32 @@ public class ServerIcon extends JavaPlugin implements Listener{
 				String playerIP = e.getPlayer().getAddress().toString();
 				playerIP = playerIP.replaceAll("/", "");
 				playerIP = playerIP.replaceAll("\\.", "-");
-				if (!(playerData.containsKey(playerIP))) {
-					playerData.put(playerIP, e.getPlayer().getName());
+				String[] split = playerIP.split(":");
+				if (!(playerData.containsKey(split[0]))) {
+					playerData.put(split[0], e.getPlayer().getName());
 				}
 			}
 			if(p.hasPermission("guardoverseer.update") && update && getConfig().getBoolean("auto-update")){
 			    p.sendMessage(ChatColor.BLUE + "An update is available: " + name + ", a " + type + " for " + version + " available at " + link);
 			    // Will look like - An update is available: AntiCheat v1.5.9, a release for CB 1.6.2-R0.1 available at http://media.curseforge.com/XYZ
-			    p.sendMessage(ChatColor.BLUE + "Type /update if you would like to automatically update.");
+			    p.sendMessage(ChatColor.BLUE + "Type /diupdate if you would like to automatically update.");
 			  }
 		}
 		@EventHandler
 		public void change(ServerListPingEvent e){
 			if(getConfig().getString("mode").equalsIgnoreCase("player_head")){
+				Bukkit.getServer().getLogger().info("player_head is enabled");
 				String playerIP = e.getAddress().toString();
 				playerIP = playerIP.replaceAll("/", "");
 				playerIP = playerIP.replaceAll("\\.", "-");
+				Bukkit.getServer().getLogger().info("player ip: " + playerIP);
 				if(playerData.containsKey(playerIP)){
+					Bukkit.getServer().getLogger().info("playerData contains ip");
 					try {
 						BufferedImage img = ImageIO.read(new URL("http://cravatar.eu/avatar/" + playerData.get(playerIP) + "/64.png"));
 						try{
 							e.setServerIcon(Bukkit.loadServerIcon(img));
+							Bukkit.getServer().getLogger().info("setting the icon");
 						}catch (Exception e1){
 							Bukkit.getServer().getLogger().log(Level.SEVERE, "Something bad occured! Please report this to the " + this.getName() + " dev!");
 							Bukkit.getServer().getLogger().log(Level.SEVERE, "Include this, and the error below with the report **Setting server icon with cravatar");
@@ -113,7 +118,7 @@ public class ServerIcon extends JavaPlugin implements Listener{
 					}
 				}else{
 					try{
-						e.setServerIcon(Bukkit.loadServerIcon(chooseIcon()));
+						if(chooseIcon() != null) e.setServerIcon(Bukkit.loadServerIcon(chooseIcon()));
 					}catch (Exception e1){
 						Bukkit.getServer().getLogger().log(Level.SEVERE, "Something bad occured! Please report this to the " + this.getName() + " dev!");
 						Bukkit.getServer().getLogger().log(Level.SEVERE, "Include this, and the error below with the report **randomIcon 1");
@@ -122,7 +127,7 @@ public class ServerIcon extends JavaPlugin implements Listener{
 				}
 			}
 			try{
-				e.setServerIcon(Bukkit.loadServerIcon(chooseIcon()));
+				if(chooseIcon() != null) e.setServerIcon(Bukkit.loadServerIcon(chooseIcon()));
 			}catch (Exception e1){
 				Bukkit.getServer().getLogger().log(Level.SEVERE, "Something bad occured! Please report this to the " + this.getName() + " dev!");
 				Bukkit.getServer().getLogger().log(Level.SEVERE, "Include this, and the error below with the report **randomIcon 2");
@@ -154,13 +159,16 @@ public class ServerIcon extends JavaPlugin implements Listener{
 							e.printStackTrace();
 						}
 			    	}else{
-			    		Bukkit.getServer().getLogger().log(Level.WARNING, "One of your server icons does not end in .png! It will not be used!");
+			    		if(!f.isHidden()){
+			    			Bukkit.getServer().getLogger().log(Level.WARNING, "One of your server icons does not end in .png! It will not be used!");
+			    		}
 			    	}
 			    }
 			  }else{
 			    Bukkit.getServer().getLogger().log(Level.SEVERE, "The serverIcons directory is missing! Trying to create one now..");
 			    dir.mkdir();
 			  }
+			  if(randomFiles.isEmpty()) return null;
 			  Random r = new Random();
 			  int fileNumber = r.nextInt(randomFiles.size());
 			  return randomFiles.get(fileNumber);
